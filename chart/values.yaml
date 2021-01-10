@@ -1,0 +1,38 @@
+deployment:
+  webserver:
+    replicas: 1
+    image: teaglebuilt/airflow:local
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+  scheduler:
+    replicas: 1
+  postgres:
+    replicas: 1
+
+services:
+  webserver:
+  scheduler:
+  postgres:
+
+storage:
+  webserver:
+    enabled: false
+    claim:
+      name: airflow-dags
+
+networkPolicies:
+  enabled: false
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []

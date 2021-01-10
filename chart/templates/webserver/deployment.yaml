@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-webserver
+  labels:
+    tier: airflow
+    component: webserver
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.deployment.webserver.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      tier: airflow
+      component: webserver
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: webserver
+        release: {{ .Release.Name }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      restartPolicy: Always
+      serviceAccountName: {{ .Release.Name }}-webserver-serviceaccount
+      containers:
+        - name: webserver
+          image: {{ .Values.deployment.webserver.image }}
+          args: ["webserver"]
+          resources:
+{{ toYaml .Values.deployment.webserver.resources | indent 12 }}
+          volumeMounts:
+          - name: dags
+            mountPath: /usr/local/airflow/dags
+    volumes:
+      {{- if .Values.storage.webserver.enabled }}
+      - name: dags
+        persistentVolumeClaim:
+          claimName: {{ .Values.storage.webserver.claim.name }}
+      {{- else }}
+      - name: dags
+        emptyDir: {}
+      {{- end }}

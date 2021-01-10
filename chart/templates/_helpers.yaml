@@ -1,0 +1,8 @@
+
+{{ define "airflow_dags_volume_claim" -}}
+{{- if .Values.storage.webserver.existingClaim -}}
+{{ .Values.storage.webserver.existingClaim }}
+{{- else -}}
+{{ .Release.Name }}-dags
+{{- end -}}
+{{- end -}}
