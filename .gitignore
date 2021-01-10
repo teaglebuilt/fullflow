@@ -1,1 +1,5 @@
+# airflow
+airflow.db
+unittest.cfg
+logs/
 env*

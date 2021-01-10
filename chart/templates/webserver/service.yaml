@@ -1,0 +1,21 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-webserver
+  labels:
+    tier: airflow
+    component: webserver
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.webserver.type }}
+  selector:
+    tier: airflow
+    component: webserver
+    release: {{ .Release.Name }}
+  ports:
+    - name: web
+      protocol: TCP
+      port: {{ .Values.service.webserver.ports.web }}
+      targetPort: {{ .Values.service.webserver.ports.web }}

@@ -1,8 +1,64 @@
+{{/* Standard Airflow environment variables */}}
+{{- define "standard_airflow_environment" }}
+  - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Values.data.metadataSecretName }}
+        key: connection
+  - name: AIRFLOW_CONN_AIRFLOW_DB
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Values.data.metadataSecretName }}
+        key: connection
+  - name:  AIRFLOW__CORE__LOAD_EXAMPLES
+    value: "False"
+{{- end }}
 
-{{ define "airflow_dags_volume_claim" -}}
-{{- if .Values.storage.webserver.existingClaim -}}
-{{ .Values.storage.webserver.existingClaim }}
-{{- else -}}
-{{ .Release.Name }}-dags
-{{- end -}}
-{{- end -}}
+{{/* User defined Airflow environment variables */}}
+{{- define "custom_airflow_environment" }}
+  - name: AIRFLOW__CORE__EXECUTOR
+    value: {{ .Values.global.airflow.executor }}
+  - name: AIRFLOW__CORE__DAGS_FOLDER
+    value: /usr/local/airflow/dags
+  - name: AIRFLOW__METRICS__STATSD_ON
+    value: "False"
+  - name: AIRFLOW__METRICS__STATSD_HOST
+    value: {{ printf "%s-statsd" .Release.Name }}
+  - name: AIRFLOW__SCHEDULER__STATSD_ON
+    value: "False"
+  - name: AIRFLOW__METRICS__STATSD_ON
+    value: "False"
+  - name: PYTHONPATH
+    value: /usr/local/airflow
+  - name: AIRFLOW_HOME
+    value: /usr/local/airflow
+{{- end }}
+
+
+
+
+{{ define "pgbouncer_config" }}
+{{- $pgMetadataHost := .Values.data.metadataConnection.host | default (printf "%s-%s.%s.svc.cluster.local" .Release.Name "postgresql" .Release.Namespace) }}
+{{- $pgResultBackendHost := .Values.data.resultBackendConnection.host | default (printf "%s-%s.%s.svc.cluster.local" .Release.Name "postgresql" .Release.Namespace) }}
+[databases]
+{{ .Release.Name }}-metadata = host={{ $pgMetadataHost }} dbname={{ .Values.data.metadataConnection.db }} port={{ .Values.data.metadataConnection.port }} pool_size={{ .Values.data.metadataConnection.poolsize }}
+{{ .Release.Name }}-result-backend = host={{ $pgResultBackendHost }} dbname={{ .Values.data.resultBackendConnection.db }} port={{ .Values.data.resultBackendConnection.port }} pool_size={{ .Values.data.resultBackendConnection.poolsize }}
+
+[pgbouncer]
+pool_mode = transaction
+listen_port = {{ .Values.deployment.postgres.ports.pgbouncer }}
+listen_addr = *
+auth_type = md5
+auth_file = /etc/pgbouncer/users.txt
+stats_users = {{ .Values.data.metadataConnection.user }}
+ignore_startup_parameters = extra_float_digits
+max_client_conn = {{ .Values.global.pgbouncer.maxClientConn }}
+verbose = {{ .Values.global.pgbouncer.verbose }}
+log_disconnections = {{ .Values.global.pgbouncer.logDisconnections }}
+log_connections = {{ .Values.global.pgbouncer.logConnections }}
+{{- end }}
+
+{{ define "pgbouncer_users" }}
+{{ .Values.data.metadataConnection.user | quote }} {{ .Values.data.metadataConnection.pass | quote }}
+{{ .Values.data.resultBackendConnection.user | quote }} {{ .Values.data.resultBackendConnection.pass | quote }}
+{{- end }}

@@ -33,21 +33,23 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
       restartPolicy: Always
-      serviceAccountName: {{ .Release.Name }}-webserver-serviceaccount
       containers:
         - name: webserver
-          image: {{ .Values.deployment.webserver.image }}
+          image: {{ .Values.global.airflow.image }}
           args: ["webserver"]
+          env:
+          {{- include "custom_airflow_environment" . | indent 10 }}
+          {{- include "standard_airflow_environment" . | indent 10 }}
           resources:
 {{ toYaml .Values.deployment.webserver.resources | indent 12 }}
           volumeMounts:
           - name: dags
             mountPath: /usr/local/airflow/dags
-    volumes:
+      volumes:
       {{- if .Values.storage.webserver.enabled }}
       - name: dags
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.webserver.claim.name }}
+          claimName: {{ .Release.Name}}-dags
       {{- else }}
       - name: dags
         emptyDir: {}
