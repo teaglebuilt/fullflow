@@ -1,21 +1,16 @@
-kind: Service
+
 apiVersion: v1
+kind: Service
 metadata:
-  name: {{ .Release.Name }}-webserver
+  name: airflow-webserver
   labels:
-    tier: airflow
-    component: webserver
-    release: {{ .Release.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: {{ .Release.Service }}
+    app: airflow-k8s
+
 spec:
-  type: {{ .Values.service.webserver.type }}
+  type: NodePort
+
   selector:
-    tier: airflow
-    component: webserver
-    release: {{ .Release.Name }}
+    app: airflow-webserver
+  
   ports:
-    - name: web
-      protocol: TCP
-      port: {{ .Values.service.webserver.ports.web }}
-      targetPort: {{ .Values.service.webserver.ports.web }}
+  - port: 8080
