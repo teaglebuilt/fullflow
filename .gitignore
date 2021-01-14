@@ -1,5 +1,11 @@
 # airflow
 airflow.db
-unittest.cfg
+unittests.cfg
 logs/
 env*
+
+chart/environments/private.yaml
+
+
+.env
+.vscode

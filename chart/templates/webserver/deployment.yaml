@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airflow-webserver
+  name: webserver
   labels:
-    app: airflow
-    component: webserver
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
 spec:
   selector:
     matchLabels:

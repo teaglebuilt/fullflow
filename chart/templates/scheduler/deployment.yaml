@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airflow-scheduler
+  name: scheduler
   labels:
-    app: airflow
-    component: scheduler
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
 spec:
   selector:
     matchLabels:
