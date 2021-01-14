@@ -5,6 +5,9 @@ metadata:
   labels:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-scheduler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:

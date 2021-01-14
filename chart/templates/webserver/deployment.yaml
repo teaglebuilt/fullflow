@@ -5,17 +5,20 @@ metadata:
   labels:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-webserver
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
-      app: airflow
-      component: webserver
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-webserver
   replicas: 1
   template:
     metadata:
       labels:
-        app: airflow
-        component: webserver
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-webserver
     spec:
       containers:
         - name: webserver

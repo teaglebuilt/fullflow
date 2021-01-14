@@ -1,0 +1,48 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:9.6
+    container_name: postgresql
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=1q2w3e
+      - POSTGRES_DB=airflow
+    ports:
+      - 5432:5432
+      
+  webserver:
+    image: teaglebuilt/airflow:local
+    container_name: airflow_webserver
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+      - ./src:/usr/local/airflow/src
+      - ./logs:/usr/local/airflow/logs
+    ports:
+      - 8080:8080
+    env_file: .env
+    environment:
+      - ENVIRONMENT=docker
+    command: webserver
+
+  scheduler:
+    image: teaglebuilt/airflow:local
+
+  scheduler-2:
+    image: teaglebuilt/airflow:local
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - webserver
+    volumes:
+      - ./dags:/usr/local/airflow/myairflow/dags
+      - ./src:/usr/local/airflow/myairflow/src
+      - ./logs:/usr/local/airflow/logs
+    env_file: .env
+    environment:
+      - ENVIRONMENT=docker
+    command: >
+      bash -c "(airflow upgradedb || airflow db upgrade) && airflow scheduler"
