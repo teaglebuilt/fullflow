@@ -3,28 +3,24 @@ kind: Deployment
 metadata:
   name: prometheus-server
   labels:
-    app: prometheus
-    component: {{ .Release.Name }}-server
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-prometheus
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: {{ .Release.Service }}
-{{- with .Values.labels }}
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   selector:
     matchLabels:
-      app: prometheus
-      component: {{ .Release.Name }}-server
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-prometheus
   replicas: 1
   strategy:
 {{ toYaml .Values.prometheus.strategy | indent 4 }}
   template:
     metadata:
-      name: prometheus
+      name: prometheus-server
       labels:
-        app: prometheus
-        component: {{ .Release.Name }}-server
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-prometheus
     spec:
       serviceAccountName: {{ .Values.prometheus.serviceAccount }}
       containers:
@@ -32,22 +28,23 @@ spec:
         image: {{ .Values.prometheus.image }}
         imagePullPolicy: Always
         args:
+        {{- if eq .Values.global.environment "dev" }}
+        - --web.enable-lifecycle
+        - --web.route-prefix=/
+        - --web.external-url=http://{{ .Values.global.hostname }}:9090/prometheus
         - --config.file=/etc/prometheus/prometheus.yml
+        {{ end }}
         ports:
         - name: ui
           containerPort: 9090
         resources:
 {{ toYaml .Values.prometheus.resources | indent 10 }}
-        {{- if .Values.prometheus.securityContext.enabled }}
         securityContext:
           runAsUser: {{ .Values.prometheus.securityContext.runAsUser }}
-        {{ end }}
         volumeMounts:
         - name: storage-volume
           mountPath: {{ .Values.prometheus.volumeMounts.data }}
         - name: config
           mountPath: {{ .Values.prometheus.volumeMounts.config }}
-        - name: rules
-          mountPath: {{ .Values.prometheus.volumeMounts.rules }}
       volumes:
 {{ toYaml .Values.prometheus.volumes | indent 6 }}

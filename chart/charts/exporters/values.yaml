@@ -1,0 +1,23 @@
+statsd:
+  enabled: true
+  ports:
+    ingest: 9125
+    scrape: 9102
+  image:
+    name: docker.repo1.uhc.com/prom/statsd-exporter
+    tag: master
+    pullPolicy: Always
+  extraNetworkPolicies: []
+  service:
+    extraAnnotations: {}
+  resources: {}
+
+
+tolerations: []
+labels: {}
+
+networkPolicies:
+  enabled: false
+
+nodeSelector: {}
+affinity: {}

@@ -5,20 +5,20 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: postgres
+      app: postgresql
   replicas: 1
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgresql
     spec:
       containers:
         - name: postgres
-          image: postgres:12
+          image: docker.repo1.uhc.com/bitnami/postgresql:latest
           resources:
             limits:
-              memory: 128Mi
-              cpu: 500m
+              memory: 200Mi
+              cpu: 100m
           ports:
             - containerPort: 5432
           env:
@@ -29,4 +29,4 @@ spec:
             - name: POSTGRES_DB
               value: airflow
             - name: POSTGRES_HOST
-              value: postgres
+              value: postgresql

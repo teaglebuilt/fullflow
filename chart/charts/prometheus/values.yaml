@@ -1,0 +1,42 @@
+global:
+  environment: "local"
+  hostname: ""
+  
+prometheus:
+  image: prom/prometheus:latest
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  serviceAccount: default
+  securityContext:
+      enabled: false
+      runAsUser: 1000
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  volumeMounts:
+    config: /etc/prometheus
+    rules: /etc/prometheus/rules
+    data: /prometheus
+  volumes:
+    - name: storage-volume
+      persistentVolumeClaim:
+        claimName: prometheus-claim
+    - name: config
+      configMap:
+        name: prometheus-config
+    - name: rules
+      configMap:
+        name: prometheus-rules
+  service:
+    name: prometheus-server
+    port: 9090
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    prometheus.io/scrape: 'true'

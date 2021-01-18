@@ -1,12 +1,21 @@
 apiVersion: v2
-name: fullflow
+name: airflow
 description: Airflow as a service
 type: application
 version: 0.1.0
-appVersion: 1.16.0
 dependencies:
   - name: nginx-ingress
     version: 1.1.2
     repository: file://charts/nginx-ingress
     tags:
       - nginx
+  - name: prometheus
+    version: 0.1.0
+    repository: file://charts/prometheus
+    tags:
+      - prometheus
+  - name: exporters
+    version: 0.1.0
+    repository: file://charts/exporters
+    tags:
+      - exporters

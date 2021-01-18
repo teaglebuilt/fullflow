@@ -25,8 +25,8 @@ spec:
   externalIPs:
 {{ toYaml .Values.controller.service.externalIPs | indent 4 }}
 {{- end }}
-{{- if .Values.nginx.controller.service.loadBalancerIP }}
-  loadBalancerIP: "{{ .Values.nginx.controller.service.loadBalancerIP }}"
+{{- if .Values.controller.service.loadBalancerIP }}
+  loadBalancerIP: "{{ .Values.controller.service.loadBalancerIP }}"
 {{- end }}
 {{- if .Values.controller.service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:

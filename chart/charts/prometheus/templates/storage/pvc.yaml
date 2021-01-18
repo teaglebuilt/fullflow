@@ -2,10 +2,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: prometheus-claim
+  labels:
+    app: prometheus
 spec:
-  {{- if eq .Values.environment "private" }}
-  storageClassName: nas-thin
-  {{ end }}
   accessModes:
     - ReadWriteMany
   resources:

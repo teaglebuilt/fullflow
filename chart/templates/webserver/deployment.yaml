@@ -28,21 +28,20 @@ spec:
             - configMapRef:
                 name: airflow-envvars-configmap
           resources:
+            requests:
+              memory: 4Gi
+              cpu: 2000m
             limits:
-              memory: "2Gi"
-              # cpu: "100"
+              memory: 4Gi
+              cpu: 2000m
           ports:
             - containerPort: 8080
+          securityContext:
+            runAsUser: 1000
           volumeMounts:
-            - name: dags-host-volume
-              mountPath: /usr/local/airflow/dags
             - name: logs-persistent-storage
               mountPath: /usr/local/airflow/logs
       volumes:
-        - name: dags-host-volume
-          hostPath:
-            path: /usr/local/airflow/dags
-            type: Directory
         - name: logs-persistent-storage
           persistentVolumeClaim:
             claimName: airflow-logs-pvc
