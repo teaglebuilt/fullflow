@@ -13,10 +13,6 @@ case "$1" in
 webserver)
     # Give the scheduler time to run initdb.
     sleep 20
-    if [ "$AIRFLOW__CORE__EXECUTOR" = "LocalExecutor" ] || [ "$AIRFLOW__CORE__EXECUTOR" = "SequentialExecutor" ]; then
-        # With the "Local" and "Sequential" executors it should all run in one container.
-        airflow scheduler &
-    fi
     echo "Starting Web Server"
     airflow webserver
     ;;

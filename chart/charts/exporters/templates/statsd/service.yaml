@@ -1,0 +1,26 @@
+{{- if .Values.statsd.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-statsd
+  labels:
+    app: exporters
+    component: statsd
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.statsd.ports.scrape | quote }}
+spec:
+  type: ClusterIP
+  selector:
+    app: exporters
+    component: statsd
+  ports:
+    - name: statsd-ingest
+      protocol: UDP
+      port: {{ .Values.statsd.ports.ingest }}
+      targetPort: {{ .Values.statsd.ports.ingest }}
+    - name: statsd-scrape
+      protocol: TCP
+      port: {{ .Values.statsd.ports.scrape }}
+      targetPort: {{ .Values.statsd.ports.scrape }}
+{{- end }}

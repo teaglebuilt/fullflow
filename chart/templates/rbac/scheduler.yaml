@@ -13,8 +13,8 @@ metadata:
   name: pods-permissions
 subjects:
   - kind: ServiceAccount
-    name: {{ .Release.Name }}-scheduler-serviceaccount
-    namespace: {{ .Values.global.namespace }}
+    name: default
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: pods-permissions

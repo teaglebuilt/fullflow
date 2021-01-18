@@ -1,21 +1,20 @@
-kind: Service
+
 apiVersion: v1
+kind: Service
 metadata:
   name: {{ .Release.Name }}-webserver
   labels:
-    tier: airflow
-    component: webserver
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.webserver.type }}
+  {{- if eq .Values.global.environment "local" }}
+  type: NodePort
+  {{ end }}
   selector:
-    tier: airflow
-    component: webserver
-    release: {{ .Release.Name }}
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
   ports:
-    - name: web
-      protocol: TCP
-      port: {{ .Values.service.webserver.ports.web }}
-      targetPort: {{ .Values.service.webserver.ports.web }}
+  - port: 8080
+    targetPort: 8080
