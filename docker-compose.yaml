@@ -1,0 +1,51 @@
+version: '3'
+services:
+  postgres:
+    image: docker.repo1.uhc.com/bitnami/postgresql:latest
+    container_name: postgresql
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=postgresql
+      - POSTGRES_DB=airflow
+    ports:
+      - 5432:5432
+      
+  webserver:
+    build: .
+    container_name: airflow_webserver
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+      - ./src:/usr/local/airflow/src
+      - ./logs:/usr/local/airflow/logs
+    ports:
+      - 8080:8080
+    env_file: .env
+    environment:
+      - ENVIRONMENT=docker
+    command: webserver
+
+  scheduler:
+    build: .
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - webserver
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+      - ./src:/usr/local/airflow/src
+      - ./logs:/usr/local/airflow/logs
+    env_file: .env
+    environment:
+      - ENVIRONMENT=docker
+    command: scheduler
+
+  gateway:
+    image: teaglebuilt/fullflow-gateway:local
+    ports:
+      - 8888:8888
+    environment:
+      KG_ALLOW_ORIGIN: '*'
