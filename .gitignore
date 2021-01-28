@@ -3,3 +3,5 @@ airflow.db
 unittest.cfg
 logs/
 env*
+
+__pycache__
