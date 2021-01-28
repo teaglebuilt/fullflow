@@ -1,21 +1,19 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: {{ .Release.Name }}-scheduler
   labels:
-    tier: airflow
-    component: scheduler
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.scheduler.type }}
+  {{- if eq .Values.global.environment "local" }}
+  type: NodePort
+  {{ end }}
   selector:
-    tier: airflow
-    component: scheduler
-    release: {{ .Release.Name }}
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
   ports:
-    - name: web
-      protocol: TCP
-      port: {{ .Values.service.scheduler.ports.logs }}
-      targetPort: {{ .Values.service.scheduler.ports.logs }}
+  - port: 8379
+    targetPort: 8379

@@ -51,7 +51,7 @@ COPY requirements.txt ${AIRFLOW_HOME}/requirements.txt
 
 # Install airflow specific dependencies
 RUN pip install \
-    "apache-airflow[kubernetes,oracle,postgres]==${AIRFLOW_VERSION}" \
+    "apache-airflow[kubernetes,statsd,postgres]==${AIRFLOW_VERSION}" \
     --constraint "${CONSTRAINT_URL}"
 
 RUN chown -R ${AIRFLOW_USER}:${AIRFLOW_USER} ${AIRFLOW_USER_HOME}

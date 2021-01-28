@@ -1,93 +1,32 @@
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-pgbouncer
-  labels:
-    tier: airflow
-    component: pgbouncer
-    release: {{ .Release.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: {{ .Release.Service }}
+  name: postgres
 spec:
-  replicas: 1
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
-      tier: airflow
-      component: pgbouncer
-      release: {{ .Release.Name }}
+      app: postgresql
+  replicas: 1
   template:
     metadata:
       labels:
-        tier: airflow
-        component: pgbouncer
-        release: {{ .Release.Name }}
+        app: postgresql
     spec:
-      nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-      affinity:
-{{ toYaml .Values.affinity | indent 8 }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 8 }}
-      restartPolicy: Always
       containers:
-        - name: pgbouncer
-          image: {{ .Values.global.pgbouncer.image }}
-          imagePullPolicy: IfNotPresent
-          command:
-            - pgbouncer
-            - -u
-            - pgbouncer
-            - /etc/pgbouncer/pgbouncer.ini
+        - name: postgres
+          image: docker.repo1.uhc.com/bitnami/postgresql:latest
           resources:
-{{ toYaml .Values.deployment.postgres.resources | indent 12 }}
+            limits:
+              memory: 200Mi
+              cpu: 100m
           ports:
-            - name: pgbouncer
-              containerPort: {{ .Values.deployment.postgres.ports.pgbouncer }}
-          livenessProbe:
-            tcpSocket:
-              port: {{ .Values.deployment.postgres.ports.pgbouncer }}
-          readinessProbe:
-            tcpSocket:
-              port: {{ .Values.deployment.postgres.ports.pgbouncer }}
-          volumeMounts:
-            - name: pgbouncer-config
-              subPath: pgbouncer.ini
-              mountPath: /etc/pgbouncer/pgbouncer.ini
-              readOnly: true
-            - name: pgbouncer-config
-              subPath: users.txt
-              mountPath: /etc/pgbouncer/users.txt
-              readOnly: true
-        - name: metrics-exporter
-          image: {{ .Values.global.metrics.postgres.image }}
+            - containerPort: 5432
           env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-pgbouncer-stats
-                  key: connection
-          ports:
-            - name: metrics
-              containerPort: {{ .Values.deployment.postgres.ports.pgbouncerScrape }}
-          livenessProbe:
-            exec:
-              command:
-                - pgbouncer_exporter
-                - health
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-                - pgbouncer_exporter
-                - health
-            initialDelaySeconds: 10
-            periodSeconds: 10
-      volumes:
-        - name: pgbouncer-config
-          secret:
-            secretName: {{ .Release.Name }}-pgbouncer-config
+            - name: POSTGRES_PASSWORD
+              value: postgresql
+            - name: POSTGRES_USER
+              value: airflow
+            - name: POSTGRES_DB
+              value: airflow
+            - name: POSTGRES_HOST
+              value: postgresql

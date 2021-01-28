@@ -1,56 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-webserver
+  name: webserver
   labels:
-    tier: airflow
-    component: webserver
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.deployment.webserver.replicas }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
   selector:
     matchLabels:
-      tier: airflow
-      component: webserver
-      release: {{ .Release.Name }}
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-webserver
+  replicas: 1
   template:
     metadata:
       labels:
-        tier: airflow
-        component: webserver
-        release: {{ .Release.Name }}
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-webserver
     spec:
-      nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-      affinity:
-{{ toYaml .Values.affinity | indent 8 }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 8 }}
-      restartPolicy: Always
       containers:
         - name: webserver
-          image: {{ .Values.global.airflow.image }}
+          image: {{ .Values.airflow.image }}
           args: ["webserver"]
-          env:
-          {{- include "custom_airflow_environment" . | indent 10 }}
-          {{- include "standard_airflow_environment" . | indent 10 }}
+          envFrom:
+            - configMapRef:
+                name: airflow-envvars-configmap
           resources:
-{{ toYaml .Values.deployment.webserver.resources | indent 12 }}
+            requests:
+              memory: 4Gi
+              cpu: 2000m
+            limits:
+              memory: 4Gi
+              cpu: 2000m
+          ports:
+            - containerPort: 8080
+          securityContext:
+            runAsUser: 1000
           volumeMounts:
-          - name: dags
-            mountPath: /usr/local/airflow/dags
+            - name: logs-persistent-storage
+              mountPath: /usr/local/airflow/logs
       volumes:
-      {{- if .Values.storage.webserver.enabled }}
-      - name: dags
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name}}-dags
-      {{- else }}
-      - name: dags
-        emptyDir: {}
-      {{- end }}
+        - name: logs-persistent-storage
+          persistentVolumeClaim:
+            claimName: airflow-logs-pvc

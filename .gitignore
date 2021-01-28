@@ -1,7 +1,9 @@
 # airflow
 airflow.db
-unittest.cfg
+unittests.cfg
 logs/
 env*
+.env
+.vscode
 
 __pycache__
