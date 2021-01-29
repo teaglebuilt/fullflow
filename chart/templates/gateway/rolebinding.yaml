@@ -3,8 +3,8 @@ kind: ClusterRoleBinding
 metadata:
   name: enterprise-gateway-controller
   labels:
-    app: enterprise-gateway
-    component: enterprise-gateway
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-gateway
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
