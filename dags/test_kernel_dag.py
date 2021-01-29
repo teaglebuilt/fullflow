@@ -12,8 +12,9 @@ def jupyter_powered_pipeline():
         print('starting')
 
     KernelOperator(
-        task_id='get_kernel',
-        conn=os.environ['GATEWAY']
+        task_id='run_model',
+        conn=os.environ['GATEWAY'],
+        kernel="python"
     )
 
 dag = jupyter_powered_pipeline()
