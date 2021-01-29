@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    gateway-selector: enterprise-gateway
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-gateway
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.gateway.replicas }}
+  selector:
+    matchLabels:
+      gateway-selector: enterprise-gateway
+  template:
+    metadata:
+      labels:
+        gateway-selector: enterprise-gateway
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-gateway
+    spec:
+      serviceAccountName: enterprise-gateway-sa
+{{- if .Values.gateway.kernelspecs.image }}
+      initContainers:
+      - name: kernelspecs
+        image: {{ .Values.gateway.kernelspecs.image }}
+        imagePullPolicy: {{ .Values.gateway.kernelspecs.imagePullPolicy }}
+        args: ["cp", "-r", "/kernels", "/usr/local/share/jupyter"]
+        volumeMounts:
+        - name: image-kernelspecs
+          mountPath: "/usr/local/share/jupyter/kernels"
+{{- end }}
+      containers:
+      - name: enterprise-gateway
+        image: {{ .Values.gateway.image }}
+        imagePullPolicy: {{ .Values.gateway.imagePullPolicy }}
+        env:
+        - name: EG_PORT
+          value: !!str {{ .Values.gateway.port }}
+        - name: EG_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: EG_KERNEL_CLUSTER_ROLE
+          value: {{ .Values.gateway.kernel.clusterRole }}
+        - name: EG_SHARED_NAMESPACE
+          value: {{ if .Values.gateway.kernel.shareGatewayNamespace }}"True"{{ else }}"False"{{ end }}
+        - name: EG_MIRROR_WORKING_DIRS
+          value: {{ if .Values.gateway.mirrorWorkingDirs }}"True"{{ else }}"False"{{ end }}
+        - name: EG_CULL_IDLE_TIMEOUT
+          value: !!str {{ .Values.gateway.kernel.cullIdleTimeout }}
+        - name: EG_LOG_LEVEL
+          value: {{ .Values.gateway.logLevel }}
+        - name: EG_KERNEL_LAUNCH_TIMEOUT
+          value: !!str {{ .Values.gateway.kernel.launchTimeout }}
+        - name: EG_KERNEL_WHITELIST
+          value: {{ toJson .Values.gateway.kernel.whitelist | squote }}
+        - name: EG_DEFAULT_KERNEL_NAME
+          value: {{ .Values.gateway.kernel.defaultKernelName }}
+        ports:
+        - containerPort: {{ .Values.gateway.port }}
+{{- if .Values.gateway.nfs.enabled }}
+        volumeMounts:
+        - name: nfs-kernelspecs
+          mountPath: "/usr/local/share/jupyter/kernels"
+      volumes:
+      - name: nfs-kernelspecs
+        nfs:
+          server: {{ .Values.gateway.nfs.internalServerIPAddress }}
+          path: "/usr/local/share/jupyter/kernels"
+{{- else if .Values.gateway.kernelspecs.image }}
+        volumeMounts:
+        - name: image-kernelspecs
+          mountPath: "/usr/local/share/jupyter/kernels"
+      volumes:
+      - name: image-kernelspecs
+        emptyDir:
+          medium: Memory
+{{- end }}
