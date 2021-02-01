@@ -1,5 +1,7 @@
 from airflow.hooks.base_hook import BaseHook
 from airflow.models import Connection
+import requests
+import os
 
 
 class KernelGateway(BaseHook):
@@ -9,4 +11,6 @@ class KernelGateway(BaseHook):
         self.gateway = self.get_connection(conn_id)
 
     def get_kernels(self):
-        pass
+        return requests.get(
+            f"{os.environ['GATEWAY']}/api/kernels"
+        ).json()

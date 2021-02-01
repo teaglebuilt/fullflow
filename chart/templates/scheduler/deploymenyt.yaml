@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-scheduler
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: {{ .Values.image }}
+          args: ["scheduler"]
+          envFrom:
+            - configMapRef:
+                name: airflow-envvars-configmap
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 512Mi
+            limits:
+              memory: 500Mi
+              cpu: 1Gi
+          ports:
+            - containerPort: 8379
+          securityContext:
+            runAsUser: 1000

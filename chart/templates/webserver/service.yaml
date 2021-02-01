@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-webserver
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  {{- if eq .Values.global.environment "local" }}
+  type: NodePort
+  {{ end }}
+  selector:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
+  ports:
+  - port: 8080
+    targetPort: 8080

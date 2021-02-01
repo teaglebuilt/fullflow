@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-webserver
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-webserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-webserver
+    spec:
+      containers:
+        - name: webserver
+          image: {{ .Values.image }}
+          args: ["webserver"]
+          envFrom:
+            - configMapRef:
+                name: airflow-envvars-configmap
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 512Mi
+            limits:
+              memory: 500Mi
+              cpu: 1Gi
+          ports:
+            - containerPort: 8080
+          securityContext:
+            runAsUser: 1000

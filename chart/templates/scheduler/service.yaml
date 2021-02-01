@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-scheduler
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  {{- if eq .Values.global.environment "local" }}
+  type: NodePort
+  {{ end }}
+  selector:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
+  ports:
+  - port: 8379
+    targetPort: 8379

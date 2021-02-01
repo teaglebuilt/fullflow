@@ -1,6 +1,11 @@
-namespace: default
-tags:
-  - jupyterhub
+global:
+  environment: "local"
+  namespace: default
+  tags:
+    - jupyterhub
+
+
+image: teaglebuilt/fullflow:dev
 
 
 gateway:
@@ -53,3 +58,8 @@ gateway:
     enabled: false
     # IP address of NFS server. Required if enabled.
     internalServerIPAddress:
+
+
+jupyterhub:
+  proxy:
+    secretToken: 9852bd4d997369faefc017bfabd1e30289fb7f87f1d34dbd47ad09782b723ea1

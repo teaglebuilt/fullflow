@@ -1,9 +1,11 @@
 import os
 import yaml
-from kubernetes import client, config
 from jinja2 import FileSystemLoader, Environment
 from airflow.kubernetes.pod_generator import PodGenerator
 from airflow.kubernetes.k8s_model import K8SModel
+from airflow.kubernetes.kube_client import client, config
+
+
 
 def generate_kernel_pod_yaml(keywords):
     """Return the kubernetes pod spec as a yaml string.
@@ -18,17 +20,17 @@ def generate_kernel_pod_yaml(keywords):
 
 
 def launch_kubernetes_kernel(kernel):
+    """launch pod for associated kernel"""
     config.load_incluster_config()
     keywords = dict()
-    breakpoint()
-    keywords['kernel_name'] = os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    keywords['kernel_name'] = kernel['name']
     keywords['kernel_id'] = kernel['id']
     keywords['eg_response_address'] = os.environ['GATEWAY']
-    keywords['kernel_spark_context_init_mode'] = ""
 
     for name, value in os.environ.items():
         if name.startswith('KERNEL_'):
             keywords[name.lower()] = yaml.safe_load(value)
 
     k8s_yaml = generate_kernel_pod_yaml(keywords)
-    # PodGenerator(pod=)
+    k8s_objs = yaml.safe_load_all(k8s_yaml)
+    client.CoreV1Api(client.ApiClient()).create_namespaced_pod(body=k8s_objs)
