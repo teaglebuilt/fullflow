@@ -13,7 +13,6 @@ services:
       
   webserver:
     build: .
-    container_name: airflow_webserver
     restart: always
     depends_on:
       - postgres
@@ -26,11 +25,13 @@ services:
     env_file: .env
     environment:
       - ENVIRONMENT=docker
+    labels:
+      app: "fullflow"
+      component: "fullflow-webserver"
     command: webserver
 
   scheduler:
     build: .
-    container_name: airflow_scheduler
     restart: always
     depends_on:
       - webserver
@@ -41,11 +42,99 @@ services:
     env_file: .env
     environment:
       - ENVIRONMENT=docker
+    labels:
+      app: "fullflow"
+      component: "fullflow-scheduler"
     command: scheduler
 
   gateway:
-    image: teaglebuilt/fullflow-gateway:local
-    ports:
-      - 8888:8888
+    image: elyra/enterprise-gateway:dev
+    user: root
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
-      KG_ALLOW_ORIGIN: '*'
+      - "EG_DOCKER_NETWORK=${EG_DOCKER_NETWORK:-enterprise-gateway_enterprise-gateway}"
+      - "EG_KERNEL_LAUNCH_TIMEOUT=${EG_KERNEL_LAUNCH_TIMEOUT:-60}"
+      - "EG_CULL_IDLE_TIMEOUT=${EG_CULL_IDLE_TIMEOUT:-3600}"
+      - "EG_KERNEL_WHITELIST=${EG_KERNEL_WHITELIST:-'r_docker','python_docker','python_tf_docker','python_tf_gpu_docker','scala_docker'}"
+      - "EG_MIRROR_WORKING_DIRS=${EG_MIRROR_WORKING_DIRS:-False}"
+      - "KG_PORT=${KG_PORT:-8888}"
+    labels:
+      app: "fullflow"
+      component: "fullflow-gateway"
+    deploy:
+      replicas: 1
+      endpoint_mode: dnsrr
+      labels:
+        app: "fullflow"
+        component: "fullflow-gateway"
+
+  gateway-proxy:
+    image: haproxy:alpine
+    ports:
+      - ${KG_PORT:-8888}:8888
+      - 9088:9088
+    networks:
+      - "fullflow-network"
+    entrypoint: ""
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat <<EOF > /usr/local/etc/haproxy/haproxy.cfg
+        global
+          maxconn 4096
+          daemon
+          log stdout format raw local0
+
+        defaults
+          log global
+          option httplog
+          mode http
+          option  http-server-close
+          option  dontlognull
+          option  redispatch
+          option  contstats
+          retries 3
+          backlog 10000
+          timeout client          25s
+          timeout connect          5s
+          timeout server          25s
+          timeout tunnel        3600s
+          timeout http-keep-alive  1s
+          timeout http-request    15s
+          timeout queue           30s
+          timeout tarpit          60s
+          default-server inter 3s rise 2 fall 3
+          option forwardfor
+
+        listen stats
+          bind :9088
+          mode http
+          stats enable
+          stats refresh 10s
+          stats realm Haproxy\ Statistics
+          stats show-node
+          stats uri /
+
+        resolvers docker
+          nameserver dns 127.0.0.11:53
+          hold valid 1s
+
+        frontend proxy
+          bind 0.0.0.0:8888 maxconn 10000
+          option forwardfor
+          default_backend enterprise-gateway
+
+        backend enterprise-gateway
+          dynamic-cookie-key ENTERPRISE_KEY
+          cookie SRVID insert dynamic
+          server-template enterprise-gateway 2 enterprise-gateway:8888 check resolvers docker
+        EOF
+        exec /docker-entrypoint.sh haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+
+        
+networks:
+  fullflow-gateway:
+    name: fullflow-gateway
+    driver: overlay

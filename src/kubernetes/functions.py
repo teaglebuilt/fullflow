@@ -4,7 +4,10 @@ from jinja2 import FileSystemLoader, Environment
 from airflow.kubernetes.pod_generator import PodGenerator
 from airflow.kubernetes.k8s_model import K8SModel
 from airflow.kubernetes.kube_client import client, config
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 
+
+    
 
 
 def generate_kernel_pod_yaml(keywords):

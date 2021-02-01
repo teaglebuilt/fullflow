@@ -29,11 +29,11 @@ spec:
                 name: airflow-envvars-configmap
           resources:
             requests:
-              memory: 200Mi
-              cpu: 512Mi
+              memory: "64Mi"
+              cpu: "250m"
             limits:
-              memory: 500Mi
-              cpu: 1Gi
+              memory: "128Mi"
+              cpu: "500m"
           ports:
             - containerPort: 8379
           securityContext:

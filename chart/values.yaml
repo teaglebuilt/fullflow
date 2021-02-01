@@ -1,11 +1,13 @@
 global:
   environment: "local"
   namespace: default
-  tags:
-    - jupyterhub
 
+tags:
+  jupyterhub: true
 
 image: teaglebuilt/fullflow:dev
+db:
+  image: bitnami/postgresql:latest
 
 
 gateway:

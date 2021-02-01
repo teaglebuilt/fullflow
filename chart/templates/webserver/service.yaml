@@ -15,5 +15,5 @@ spec:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-webserver
   ports:
-  - port: 8080
+  - port: 8089
     targetPort: 8080
