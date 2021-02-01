@@ -4,7 +4,7 @@ from airflow.utils.dates import days_ago
 from src.operators.kernel import KernelOperator
 
 
-@dag(default_args={"owner": "airflow"}, schedule_interval=None, start_date=days_ago(2), tags=['kernel'])
+@dag("test_kernel", default_args={"owner": "airflow"}, schedule_interval=None, start_date=days_ago(2), tags=['kernel'])
 def jupyter_powered_pipeline():
 
     @task
