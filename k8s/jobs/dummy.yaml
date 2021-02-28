@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job # not required. Will be a prefix to task name
+  finalizers:
+    - foregroundDeletion
+spec:
+  template:
+    metadata:
+      labels:
+        app: test-task-pod
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: job-executor
+          image: ubuntu
+          command:
+            - bash
+            - -c
+            - |
+              #/usr/bin/env bash
+              echo "OK"
+  backoffLimit: 0

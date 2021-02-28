@@ -23,7 +23,7 @@ WORKDIR ${AIRFLOW_HOME}
 RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} -G sudo ${AIRFLOW_USER} && \
     apt-get install -y --fix-broken && \
     apt-get autoremove && \
-    apt-get update && apt-get -y upgrade && \ 
+    apt-get update && apt-get -y upgrade && \
     apt-get install -y --no-install-recommends apt-utils \
     freetds-bin \
     ldap-utils \
@@ -45,14 +45,12 @@ RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} -G sudo ${AIRFLOW_USER} && \
 # COPY local airflow directory
 COPY dags ${AIRFLOW_HOME}/dags
 COPY src ${AIRFLOW_HOME}/src
+COPY k8s ${AIRFLOW_HOME}/k8s
 COPY airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY entrypoint.sh /entrypoint.sh
 COPY requirements.txt ${AIRFLOW_HOME}/requirements.txt
 
-# Install airflow specific dependencies
-RUN pip install \
-    "apache-airflow[kubernetes,statsd,postgres]==${AIRFLOW_VERSION}" \
-    --constraint "${CONSTRAINT_URL}"
+RUN pip install -r requirements.txt
 
 RUN chown -R ${AIRFLOW_USER}:${AIRFLOW_USER} ${AIRFLOW_USER_HOME}
 RUN chmod +x /entrypoint.sh

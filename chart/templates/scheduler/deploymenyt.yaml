@@ -26,14 +26,7 @@ spec:
           args: ["scheduler"]
           envFrom:
             - configMapRef:
-                name: airflow-envvars-configmap
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
+                name: fullflow-envvars
           ports:
             - containerPort: 8379
           securityContext:
