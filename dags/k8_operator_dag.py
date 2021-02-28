@@ -1,26 +1,43 @@
 import os
-from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.operators.docker_operator import DockerOperator
 from airflow.models import DAG
-from airflow.decorators import task
+from airflow_kubernetes_job_operator.kubernetes_job_operator import KubernetesJobOperator
+from airflow_kubernetes_job_operator.kubernetes_legacy_job_operator import KubernetesLegacyJobOperator
 from airflow.utils.dates import days_ago
+from airflow.models.baseoperator import BaseOperator
 
 
-with DAG(
-   "test_dag",
-   start_date=days_ago(1),
-   schedule_interval=None,
-) as dag:
+default_args = {
+    "owner": "tester",
+    "start_date": days_ago(2),
+    "retries": 0
+}
 
-    setup_client_in_k8 = KubernetesPodOperator(
-        namespace='default', 
-        image="python:3.8", 
-        cmds=["python","-c"], 
-        arguments=["print('hello world')"], 
-        name="setup_client-test", 
-        task_id="kubernetes", 
-        labels={"client": "hphc"},
-        get_logs=True, 
-        in_cluster=True, 
-        dag=dag 
-    )
+
+dag = DAG(
+   "job-tester",
+   default_args=default_args,
+   description="Test base job operator",
+   schedule_interval=None
+)
+
+job_task = KubernetesJobOperator(
+    task_id="teaglebuilt/fullflow:dev",
+    dag=dag,
+    image="ubuntu",
+    command=["bash", "-c", 'echo "all ok"'],
+)
+
+job_task_from_yaml = KubernetesJobOperator(
+    dag=dag,
+    task_id="from-yaml",
+    body_filepath=f"{os.environ['AIRFLOW_HOME']}/k8s/jobs/dummy.yaml"
+)
+
+# Legacy compatibility to KubernetesPodOperator
+legacy_job_task = KubernetesLegacyJobOperator(
+    task_id="legacy-image-job",
+    image="ubuntu",
+    cmds=["bash", "-c", 'echo "all ok"'],
+    dag=dag,
+    is_delete_operator_pod=True,
+)
