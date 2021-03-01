@@ -1,9 +1,17 @@
 # airflow
 airflow.db
 unittests.cfg
+webserver_config.py
+
 logs/
+
+
 env*
 .env
+
 .vscode
+
+
 .ipynb*
 __pycache__
+.ipynb_checkpoints
