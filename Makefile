@@ -2,9 +2,13 @@ CHARTS = jupyterhub
 env := dev
 
 
-.PHONY: install
+.PHONY: uninstall install
 install:
 	helm install fullflow chart/
+
+uninstall:
+  helm uninstall fullflow
+
 
 .PHONY: build
 build:
@@ -12,5 +16,7 @@ build:
 
 forward:
   kubectl port-forward svc/fullflow-webserver 8080:8080
-gateway:
-  jupyter kernelgateway --KernelGatewayApp.ip=0.0.0.0 --KernelGatewayApp.port=8888
+
+.PHONY: notebook
+notebook:
+  jupyter notebook --gateway-url=0.0.0.0:9000 --GatewayClient.auth_token='poop' --GatewayClient.request_timeout=600
