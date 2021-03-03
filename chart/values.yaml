@@ -3,7 +3,7 @@ global:
   namespace: default
 
 tags:
-  jupyterhub: false
+  jupyterhub: true
 
 image: teaglebuilt/fullflow:dev
 db:
