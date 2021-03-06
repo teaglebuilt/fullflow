@@ -2,9 +2,3 @@ apiVersion: v2
 name: fullflow
 description: Fullflow helm chart for infrastructure packaging on kubernetes
 version: 0.1.0
-dependencies:
-  - name: jupyterhub
-    repository: https://jupyterhub.github.io/helm-chart
-    version: 0.11.1
-    tags:
-      - jupyterhub

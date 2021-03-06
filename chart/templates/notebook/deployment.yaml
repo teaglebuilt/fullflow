@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-notebook
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-notebook
+    spec:
+      containers:
+        - name: notebook
+          image: {{ .Values.image }}
+          args: ["notebook"]
+          environment:
+            - name: JUPYTER_GATEWAY_URL
+              value: http://enterprise-gateway:8888
+          ports:
+            - containerPort: 8089
+          securityContext:
+            runAsUser: 1000
