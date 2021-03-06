@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scheduler
+  name: notebook
   labels:
     app: {{ .Release.Name }}
-    component: {{ .Release.Name }}-scheduler
+    component: {{ .Release.Name }}-notebook
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
@@ -24,7 +24,7 @@ spec:
         - name: notebook
           image: {{ .Values.image }}
           args: ["notebook"]
-          environment:
+          env:
             - name: JUPYTER_GATEWAY_URL
               value: http://enterprise-gateway:8888
           ports:
