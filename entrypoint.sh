@@ -34,7 +34,7 @@ worker)
     echo "Starting Worker"
     exec airflow "$@"
     ;;
-notebook)
+lab)
     echo "jupyter gateway url must be set"
     exec jupyter "$@" --port 8089
     ;;

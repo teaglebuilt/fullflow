@@ -1,12 +1,48 @@
 version: '3.5'
 services:
+  traefik:
+    image: "traefik:v2.0.0-rc3"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  enterprise-gateway:
+    image: elyra/enterprise-gateway:dev
+    user: root
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - "EG_DOCKER_NETWORK=${EG_DOCKER_NETWORK:-enterprise-gateway_enterprise-gateway}"
+      - "EG_KERNEL_LAUNCH_TIMEOUT=${EG_KERNEL_LAUNCH_TIMEOUT:-60}"
+      - "EG_CULL_IDLE_TIMEOUT=${EG_CULL_IDLE_TIMEOUT:-3600}"
+      - "EG_KERNEL_WHITELIST=${EG_KERNEL_WHITELIST:-'r_docker','python_docker','python_tf_docker','python_tf_gpu_docker','scala_docker'}"
+      - "EG_MIRROR_WORKING_DIRS=${EG_MIRROR_WORKING_DIRS:-False}"
+      - "KG_PORT=${KG_PORT:-8888}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+
   notebook:
     build: .
     ports:
      - "8089:8089"
     environment:
       JUPYTER_GATEWAY_URL: http://127.0.0.1:9999
-    command: notebook
+    command: lab
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
 
   webserver:
     build: .
@@ -22,9 +58,11 @@ services:
     env_file: .env
     environment:
       - ENVIRONMENT=docker
-    networks:
-      - fullflow
     command: webserver
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
 
   scheduler:
     build: .
@@ -39,11 +77,16 @@ services:
     environment:
       - ENVIRONMENT=docker
     command: scheduler
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.scheduler.rule=Host(`scheduler.localhost`)"
+    #   - "traefik.http.routers.scheduler.entrypoints=web"
 
   postgres:
     image: bitnami/postgresql:latest
-    hostname: postgres
+    hostname: postgresql
     environment:
+      - POSTGRES_HOST=postgresql
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=postgresql
       - POSTGRES_DB=airflow

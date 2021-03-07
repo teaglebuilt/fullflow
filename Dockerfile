@@ -3,7 +3,7 @@ FROM python:3.8-slim-buster
 SHELL ["/bin/bash", "-l", "-c"]
 
 # Airflow
-ARG AIRFLOW_VERSION=2.0.0
+ARG AIRFLOW_VERSION=2.0.1
 ARG AIRFLOW_USER=airflow
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
@@ -52,11 +52,11 @@ COPY requirements.txt ${AIRFLOW_HOME}/requirements.txt
 
 RUN pip install -r requirements.txt
 
-RUN chown -R ${AIRFLOW_USER}:${AIRFLOW_USER} ${AIRFLOW_USER_HOME}
+RUN chown -R ${AIRFLOW_USER}:${AIRFLOW_USER} ${AIRFLOW_HOME}
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8080 5555 8793 8089 8888 9999
 
-USER ${AIRFLOW_USER}
-WORKDIR ${AIRFLOW_USER_HOME}
+USER airflow
+WORKDIR ${AIRFLOW_HOME}
 ENTRYPOINT ["/entrypoint.sh"]
