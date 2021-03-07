@@ -1,43 +1,40 @@
-import os
-from airflow.models import DAG
-from airflow_kubernetes_job_operator.kubernetes_job_operator import KubernetesJobOperator
-from airflow_kubernetes_job_operator.kubernetes_legacy_job_operator import KubernetesLegacyJobOperator
+import json
+from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-from airflow.models.baseoperator import BaseOperator
 
 
 default_args = {
-    "owner": "tester",
-    "start_date": days_ago(2),
-    "retries": 0
+    'owner': 'airflow',
 }
 
 
-dag = DAG(
-   "job-tester",
-   default_args=default_args,
-   description="Test base job operator",
-   schedule_interval=None
-)
+@dag(default_args=default_args, schedule_interval=None, start_date=days_ago(2), tags=['example'])
+def tutorial_taskflow_api_etl():
 
-job_task = KubernetesJobOperator(
-    task_id="teaglebuilt/fullflow:dev",
-    dag=dag,
-    image="ubuntu",
-    command=["bash", "-c", 'echo "all ok"'],
-)
 
-job_task_from_yaml = KubernetesJobOperator(
-    dag=dag,
-    task_id="from-yaml",
-    body_filepath=f"{os.environ['AIRFLOW_HOME']}/k8s/jobs/dummy.yaml"
-)
+    @task()
+    def extract():
+        data_string = '{"1001": 301.27, "1002": 433.21, "1003": 502.22}'
+        order_data_dict = json.loads(data_string)
+        return order_data_dict
 
-# Legacy compatibility to KubernetesPodOperator
-legacy_job_task = KubernetesLegacyJobOperator(
-    task_id="legacy-image-job",
-    image="ubuntu",
-    cmds=["bash", "-c", 'echo "all ok"'],
-    dag=dag,
-    is_delete_operator_pod=True,
-)
+
+    @task(multiple_outputs=True)
+    def transform(order_data_dict: dict):
+        total_order_value = 0
+        for value in order_data_dict.values():
+            total_order_value += value
+        return {"total_order_value": total_order_value}
+
+
+    @task()
+    def load(total_order_value: float):
+        print("Total order value is: %.2f" % total_order_value)
+
+
+    order_data = extract()
+    order_summary = transform(order_data)
+    load(order_summary["total_order_value"])
+
+
+tutorial_etl_dag = tutorial_taskflow_api_etl()

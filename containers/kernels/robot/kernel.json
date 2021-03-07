@@ -1,0 +1,22 @@
+{
+    "display_name": "Robot Framework",
+    "language": "robotframework",
+    "metadata": {
+      "process_proxy": {
+        "class_name": "enterprise_gateway.services.processproxies.distributed.DistributedProcessProxy"
+      }
+    },
+    "argv": [
+      "python",
+      "-m",
+      "robot.kernel",
+      "--RemoteProcessProxy.kernel-id",
+      "{kernel_id}",
+      "--RemoteProcessProxy.response-address",
+      "{response_address}",
+      "--RemoteProcessProxy.port-range",
+      "{port_range}",
+      "--RemoteProcessProxy.spark-context-initialization-mode",
+      "none"
+    ]
+  }

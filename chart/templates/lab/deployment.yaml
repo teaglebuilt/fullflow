@@ -23,7 +23,7 @@ spec:
       containers:
         - name: notebook
           image: {{ .Values.image }}
-          args: ["notebook"]
+          args: ["lab"]
           env:
             - name: JUPYTER_GATEWAY_URL
               value: http://enterprise-gateway:8888
