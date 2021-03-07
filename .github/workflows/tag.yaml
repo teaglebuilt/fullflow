@@ -1,0 +1,22 @@
+name: Auto Tag
+
+on:
+  workflow_run:
+    workflows: ["Infra CI"]
+    types:
+      - completed
+
+jobs:
+  tag:
+    name: Automatic Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Run
+        run: |
+          ./.github/helm_tag.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

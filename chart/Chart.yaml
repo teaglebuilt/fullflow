@@ -2,3 +2,8 @@ apiVersion: v2
 name: fullflow
 description: Fullflow helm chart for infrastructure packaging on kubernetes
 version: 0.1.0
+dependencies:
+- name: traefik
+  repository: file://charts/traefik
+  tags:
+    - traefik

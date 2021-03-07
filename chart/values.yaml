@@ -2,6 +2,10 @@ global:
   environment: "local"
   namespace: default
 
+tags:
+  traefik: false
+
+
 image: teaglebuilt/fullflow:dev
 db:
   image: bitnami/postgresql:latest
