@@ -1,60 +1,51 @@
 version: '3.5'
 services:
   traefik:
-    image: traefik:v2.3
-    ports:
-      - 80:80
-    restart: always
-    volumes:
-      - var/run/docker.sock:/var/run/docker.sock.ro
+    image: "traefik:v2.0.0-rc3"
+    container_name: "traefik"
     command:
-      - --providers.docker
-      - providers.docker.exposedbydefault=false
-      - entrypoints.http.address:=80
-      - --accesslog
-      - --log
-
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-    image: jupyter
-    container_name: jupyter
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
     ports:
-     - "9888:8888"
+      - "80:80"
+      - "8080:8080"
     volumes:
-     - ./:/opt/dev/
-    environment:
-      KG_URL: http://jupyter-kernel:8888
-      KG_AUTH_TOKEN: colonels
-    command: >
-      jupyter lab
-      --NotebookApp.ip=0.0.0.0
-      --NotebookApp.session_manager_class=nb2kg.managers.SessionManager
-      --NotebookApp.kernel_manager_class=nb2kg.managers.RemoteKernelManager
-      --NotebookApp.kernel_spec_manager_class=nb2kg.managers.RemoteKernelSpecManager
-      --allow-root
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  kernel_gateway:
-    build:
-      context: containers/gateway
-    image: jupyter-kernel
-    container_name: gateway
-    ports:
-     - "9889:8888"
+  enterprise-gateway:
+    image: elyra/enterprise-gateway:dev
+    user: root
     volumes:
-     - ./:/opt/dev/
+      - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
-      KG_ALLOW_ORIGIN: '*'
-      KG_LIST_KERNELS: "True"
-      KG_AUTH_TOKEN: poop
-    command: >
-      jupyter kernelgateway
-      --KernelGatewayApp.ip=0.0.0.0
-      --KernelGatewayApp.log_level=DEBUG
+      - "EG_DOCKER_NETWORK=${EG_DOCKER_NETWORK:-enterprise-gateway_enterprise-gateway}"
+      - "EG_KERNEL_LAUNCH_TIMEOUT=${EG_KERNEL_LAUNCH_TIMEOUT:-60}"
+      - "EG_CULL_IDLE_TIMEOUT=${EG_CULL_IDLE_TIMEOUT:-3600}"
+      - "EG_KERNEL_WHITELIST=${EG_KERNEL_WHITELIST:-'r_docker','python_docker','python_tf_docker','python_tf_gpu_docker','scala_docker'}"
+      - "EG_MIRROR_WORKING_DIRS=${EG_MIRROR_WORKING_DIRS:-False}"
+      - "KG_PORT=${KG_PORT:-8888}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+
+  notebook:
+    build: .
+    ports:
+     - "8089:8089"
+    environment:
+      JUPYTER_GATEWAY_URL: http://127.0.0.1:9999
+    command: lab
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
 
   webserver:
-    image: teaglebuilt/fullflow:local
+    build: .
     restart: always
     depends_on:
       - postgres
@@ -65,14 +56,14 @@ services:
     ports:
       - 8099:8080
     env_file: .env
-    environment:
-      - ENVIRONMENT=docker
-    networks:
-      - fullflow
     command: webserver
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
 
   scheduler:
-    image: teaglebuilt/fullflow:local
+    build: .
     restart: always
     depends_on:
       - webserver
@@ -83,22 +74,15 @@ services:
     env_file: .env
     environment:
       - ENVIRONMENT=docker
-    networks:
-      - fullflow
     command: scheduler
 
   postgres:
     image: bitnami/postgresql:latest
-    hostname: postgres
+    hostname: postgresql
     environment:
+      - POSTGRES_HOST=postgresql
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=postgresql
       - POSTGRES_DB=airflow
     ports:
       - 5432:5432
-    networks:
-      - fullflow
-
-networks:
-  fullflow:
-    external: false

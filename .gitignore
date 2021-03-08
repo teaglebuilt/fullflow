@@ -2,16 +2,20 @@
 airflow.db
 unittests.cfg
 webserver_config.py
-
 logs/
-
 
 env*
 .env
 
 .vscode
 
-
 .ipynb*
 __pycache__
+*/__pycache__/*
 .ipynb_checkpoints
+
+static/
+
+.yarn.lock
+node_modules/
+package-lock.json

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+
+
 open() {
     echo "port forwarding ${1} over ${2}"
     kubectl port-forward "${1}" "${2}"
@@ -16,10 +18,22 @@ install() {
     helm install fullflow chart/
 }
 
-build(){
+build-docker() {
     echo "build and push docker image for environment"
     docker build --tag teaglebuilt/fullflow:${1} .
     docker push teaglebuilt/fullflow:${1}
+}
+
+build-static() {
+    jlpm install
+    jlpm build
+}
+
+function extension {
+    pip install -e .
+    jupyter serverextension enable --py fullflow --sys-prefix
+    jupyter nbextension install --py fullflow --sys-prefix
+    jupyter nbextension enable --py fullflow --sys-prefix
 }
 
 function help {

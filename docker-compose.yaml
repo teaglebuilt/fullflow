@@ -13,9 +13,10 @@ services:
       - "80:80"
       - "8080:8080"
     volumes:
+      - ./configs/traefik.toml:/etc/traefik/traefik.toml
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  enterprise-gateway:
+  gateway:
     image: elyra/enterprise-gateway:dev
     user: root
     volumes:
@@ -29,20 +30,22 @@ services:
       - "KG_PORT=${KG_PORT:-8888}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.frontend.rule=Host:gateway.localhost"
+      - "traefik.port=9999"
+    ports:
+      - 9999:8888
 
   notebook:
     build: .
     ports:
-     - "8089:8089"
+     - 8089:8089
     environment:
-      JUPYTER_GATEWAY_URL: http://127.0.0.1:9999
+      JUPYTER_GATEWAY_URL: http://gateway:9999
     command: lab
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.frontend.rule=Host:lab.localhost"
+      - "traefik.port=8089"
 
   webserver:
     build: .
@@ -56,13 +59,11 @@ services:
     ports:
       - 8099:8080
     env_file: .env
-    environment:
-      - ENVIRONMENT=docker
     command: webserver
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.frontend.rule=Host:webserver.localhost"
+      - "traefik.port=8099"
 
   scheduler:
     build: .
@@ -77,10 +78,10 @@ services:
     environment:
       - ENVIRONMENT=docker
     command: scheduler
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.scheduler.rule=Host(`scheduler.localhost`)"
-    #   - "traefik.http.routers.scheduler.entrypoints=web"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:scheduler.localhost"
+      - "traefik.port=8973"
 
   postgres:
     image: bitnami/postgresql:latest

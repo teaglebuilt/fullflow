@@ -36,7 +36,7 @@ worker)
     ;;
 lab)
     echo "jupyter gateway url must be set"
-    exec jupyter "$@" --port 8089
+    exec jupyter "$@"
     ;;
 version)
     echo "Printing Version"
