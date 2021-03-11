@@ -15,5 +15,5 @@ spec:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-notebook
   ports:
-  - port: 8089
-    targetPort: 8089
+  - port: 9999
+    targetPort: 8888

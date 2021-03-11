@@ -1,0 +1,4 @@
+apiVersion: v2
+name: enterprise-gateway
+description: Gateway for remote kernel management & execution
+version: 0.1.0

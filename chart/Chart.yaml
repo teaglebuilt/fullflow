@@ -7,3 +7,7 @@ dependencies:
   repository: file://charts/traefik
   tags:
     - traefik
+- name: gateway
+  repository: file://charts/gateway
+  tags:
+    - gateway

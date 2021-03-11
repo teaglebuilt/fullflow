@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: kernel-image-puller
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.namespace }}
 spec:
   selector:
     matchLabels:
@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         name: kernel-image-puller
-        app: {{ .Release.Name }}
+        app: enterprise-gateway
         component: {{ .Release.Name }}-kernel-puller
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: {{ .Values.gateway.kip.imagePullPolicy }}
         env:
         - name: KIP_GATEWAY_HOST
-          value: "http://enterprise-gateway.{{ .Release.Namespace }}:{{ .Values.gateway.port }}"
+          value: "http://enterprise-gateway.enterprise-gateway:{{ .Values.gateway.port }}"
         - name: KIP_INTERVAL
           value: !!str {{ .Values.gateway.kip.interval }}
         - name: KIP_PULL_POLICY

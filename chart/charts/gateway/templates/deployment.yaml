@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: enterprise-gateway
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.Namespace }}
   labels:
     gateway-selector: enterprise-gateway
-    app: {{ .Release.Name }}
+    app: enterprise-gateway
     component: {{ .Release.Name }}-gateway
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -15,13 +15,13 @@ spec:
   selector:
     matchLabels:
       gateway-selector: enterprise-gateway
-      app: {{ .Release.Name }}
+      app: enterprise-gateway
       component: {{ .Release.Name }}-gateway
   template:
     metadata:
       labels:
         gateway-selector: enterprise-gateway
-        app: {{ .Release.Name }}
+        app: enterprise-gateway
         component: {{ .Release.Name }}-gateway
     spec:
       serviceAccountName: enterprise-gateway-sa
@@ -43,7 +43,7 @@ spec:
         - name: EG_PORT
           value: !!str {{ .Values.gateway.port }}
         - name: EG_NAMESPACE
-          value: {{ .Release.Namespace }}
+          value: {{ .Values.namespace }}
         - name: EG_KERNEL_CLUSTER_ROLE
           value: {{ .Values.gateway.kernel.clusterRole }}
         - name: EG_SHARED_NAMESPACE
