@@ -46,9 +46,12 @@ RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} -G sudo ${AIRFLOW_USER} && \
 COPY dags ${AIRFLOW_HOME}/dags
 COPY src ${AIRFLOW_HOME}/src
 COPY k8s ${AIRFLOW_HOME}/k8s
-COPY airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
+COPY configs/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY entrypoint.sh /entrypoint.sh
 COPY requirements.txt ${AIRFLOW_HOME}/requirements.txt
+COPY notebooks ${AIRFLOW_HOME}/notebooks
+COPY test.py ${AIRFLOW_HOME}/test.py
+
 
 RUN pip install -r requirements.txt
 
