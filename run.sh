@@ -24,16 +24,14 @@ build-docker() {
     docker push teaglebuilt/fullflow:${1}
 }
 
-build-static() {
-    jlpm install
-    jlpm build
+
+kernels() {
+    http GET $JUPYTER_GATEWAY_URL/api/kernels
 }
 
-function extension {
-    pip install -e .
-    jupyter serverextension enable --py fullflow --sys-prefix
-    jupyter nbextension install --py fullflow --sys-prefix
-    jupyter nbextension enable --py fullflow --sys-prefix
+clean() {
+    rm -rf .pytest_cache/ .coverage dist build *.egg-info
+    find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 }
 
 function help {

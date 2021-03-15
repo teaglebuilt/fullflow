@@ -1,21 +1,5 @@
 version: '3.5'
 services:
-  traefik:
-    image: "traefik:v2.0.0-rc3"
-    container_name: "traefik"
-    command:
-      #- "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - ./configs/traefik.toml:/etc/traefik/traefik.toml
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
   gateway:
     image: elyra/enterprise-gateway:dev
     user: root
@@ -28,68 +12,63 @@ services:
       - "EG_KERNEL_WHITELIST=${EG_KERNEL_WHITELIST:-'r_docker','python_docker','python_tf_docker','python_tf_gpu_docker','scala_docker'}"
       - "EG_MIRROR_WORKING_DIRS=${EG_MIRROR_WORKING_DIRS:-False}"
       - "KG_PORT=${KG_PORT:-8888}"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:gateway.localhost"
-      - "traefik.port=9999"
     ports:
       - 9999:8888
 
-  notebook:
+  lab:
     build: .
     ports:
-     - 8089:8089
+     - 8888:8888
     environment:
-      JUPYTER_GATEWAY_URL: http://gateway:9999
+      - JUPYTER_GATEWAY_URL=http://gateway:9999
+      - JUPYTER_ENABLE_LAB=yes
     command: lab
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:lab.localhost"
-      - "traefik.port=8089"
 
-  webserver:
-    build: .
-    restart: always
-    depends_on:
-      - postgres
-    volumes:
-      - ./dags:/usr/local/airflow/dags
-      - ./src:/usr/local/airflow/src
-      - ./logs:/usr/local/airflow/logs
-    ports:
-      - 8099:8080
-    env_file: .env
-    command: webserver
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:webserver.localhost"
-      - "traefik.port=8099"
+  # webserver:
+  #   build: .
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - ./dags:/usr/local/airflow/dags
+  #     - ./src:/usr/local/airflow/src
+  #     - ./logs:/usr/local/airflow/logs
+  #   ports:
+  #     - 8099:8080
+  #   env_file: .env
+  #   command: webserver
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.frontend.rule=Host:webserver.localhost"
+  #     - "traefik.port=8099"
 
-  scheduler:
-    build: .
-    restart: always
-    depends_on:
-      - webserver
-    volumes:
-      - ./dags:/usr/local/airflow/dags
-      - ./src:/usr/local/airflow/src
-      - ./logs:/usr/local/airflow/logs
-    env_file: .env
-    environment:
-      - ENVIRONMENT=docker
-    command: scheduler
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:scheduler.localhost"
-      - "traefik.port=8973"
+  # scheduler:
+  #   build: .
+  #   restart: always
+  #   depends_on:
+  #     - webserver
+  #   volumes:
+  #     - ./dags:/usr/local/airflow/dags
+  #     - ./src:/usr/local/airflow/src
+  #     - ./logs:/usr/local/airflow/logs
+  #   env_file: .env
+  #   environment:
+  #     - ENVIRONMENT=docker
+  #   command: scheduler
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.frontend.rule=Host:scheduler.localhost"
+  #     - "traefik.port=8973"
 
-  postgres:
-    image: bitnami/postgresql:latest
-    hostname: postgresql
-    environment:
-      - POSTGRES_HOST=postgresql
-      - POSTGRES_USER=airflow
-      - POSTGRES_PASSWORD=postgresql
-      - POSTGRES_DB=airflow
-    ports:
-      - 5432:5432
+  # postgres:
+  #   image: bitnami/postgresql:latest
+  #   hostname: postgresql
+  #   environment:
+  #     - POSTGRES_HOST=postgresql
+  #     - POSTGRES_USER=airflow
+  #     - POSTGRES_PASSWORD=postgresql
+  #     - POSTGRES_DB=airflow
+  #   ports:
+  #     - 5432:5432
+
+
