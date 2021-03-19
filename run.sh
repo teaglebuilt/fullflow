@@ -34,6 +34,11 @@ clean() {
     find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 }
 
+package() {
+    clean
+    python setup.py sdist bdist_wheel
+}
+
 function help {
     printf "%s <task> [args]\n\nTasks:\n" "${0}"
     compgen -A function | grep -v "^_" | cat -n

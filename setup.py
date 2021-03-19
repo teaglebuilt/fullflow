@@ -14,13 +14,15 @@ with open('README.md') as readme_file:
 # ]
 
 requirements = [
-    "apache-airflow:2.0.0",
-    "jupyterlab=3.0.9"
+    "apache-airflow==2.0.1",
+    "jupyterlab==3.0.9"
 ]
 
 setup(
-    name='fullflow',
+    name='fullflow_extension',
     description="Machine Learning and ETL Platform as a service.",
+    version='0.0.1',
+    url='https://github.com/teaglebuilt/fullflow',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -35,9 +37,5 @@ setup(
     install_requires=requirements,
     include_package_data=True,
     keywords='etl, pipelines, machinelearning',
-    packages=find_packages(),
-    test_suite='tests',
-    url='https://github.com/teaglebuilt/fullflow',
-    version='0.0.1',
-    zip_safe=False
+    packages=find_packages()
 )
