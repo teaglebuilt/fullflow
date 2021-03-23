@@ -1,7 +1,6 @@
 from unittest import TestCase
 from src.models import Pipeline, Node
 
-
 def one():
     return 'one'
 
