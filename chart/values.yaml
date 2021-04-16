@@ -1,17 +1,30 @@
 global:
-  environment: "local"
+  environment: local
   namespace: default
 
 tags:
   traefik: false
   gateway: false
+  loki: false
+  grafana: false
 
 
 image: teaglebuilt/fullflow:dev
 pullPolicy: Always
 
+
 db:
   image: bitnami/postgresql:latest
   pullPolicy: Always
+  persistence:
+    enabled: false
+
+
+loki:
+  persistence:
+    enabled: false
+
+
+grafana:
   persistence:
     enabled: false

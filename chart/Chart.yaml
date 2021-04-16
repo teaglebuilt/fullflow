@@ -11,3 +11,11 @@ dependencies:
   repository: file://charts/gateway
   tags:
     - gateway
+- name: grafana
+  repository: file://charts/grafana
+  tags:
+    - grafana
+- name: loki
+  repository: file://charts/loki
+  tags:
+    - loki

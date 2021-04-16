@@ -2,7 +2,7 @@ name: Auto Tag
 
 on:
   workflow_run:
-    workflows: ["Infra CI"]
+    workflows: ["Release"]
     types:
       - completed
 
