@@ -1,4 +1,35 @@
-version: '3.5'
+x-airflow-environment: &airflow-environment
+  build: .
+  environment:
+  - AIRFLOW_USER=admin
+  - AIRFLOW_PASSWORD=admin
+  - PYTHONPATH=/usr/local/airflow
+  - AIRFLOW_HOME=/usr/local/airflow
+  - POSTGRES_USER=fullflow
+  - POSTGRES_PASSWORD=postgresql
+  - POSTGRES_DB=airflow
+  - POSTGRES_HOST=postgresql
+  - POSTGRES_PORT=5432
+  - AIRFLOW__CORE__FERNET_KEY=_vlbm4VJwSvCYuBSHlOGPqDQyWkgrSp47P8ou6zP0zY=
+  - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+  - AIRFLOW__CORE__DAGS_FOLDER=/usr/local/airflow/dags
+  - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://fullflow:postgresql@postgresql:5432/airflow
+  - AIRFLOW__CORE__STORE_SERIALIZED_DAGS=True
+  - AIRFLOW__CORE__STORE_DAG_CODE=True
+  - LOCAL_STORAGE=/opt/storage
+  # The following configurations work for docker resource limit of 12gb and 6cpu's (adjust it accordingly)
+  - AIRFLOW__CORE__PARALLELISM=64
+  - AIRFLOW__CORE__DAG_CONCURRENCY=64
+  - AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=64
+  - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+
+x-airflow-volumes: &airflow-volumes
+  volumes:
+    - ./dags/:/usr/local/airflow/dags
+    - ./logs/:/usr/local/airflow/logs
+    - ./src/:/usr/local/airflow/src
+
+version: '3.8'
 services:
   gateway:
     image: elyra/enterprise-gateway:dev
@@ -24,51 +55,43 @@ services:
       - JUPYTER_ENABLE_LAB=yes
     command: lab
 
-  # webserver:
-  #   build: .
-  #   restart: always
-  #   depends_on:
-  #     - postgres
-  #   volumes:
-  #     - ./dags:/usr/local/airflow/dags
-  #     - ./src:/usr/local/airflow/src
-  #     - ./logs:/usr/local/airflow/logs
-  #   ports:
-  #     - 8099:8080
-  #   env_file: .env
-  #   command: webserver
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.frontend.rule=Host:webserver.localhost"
-  #     - "traefik.port=8099"
+  webserver:
+    <<: *airflow-environment
+    restart: always
+    depends_on:
+      - postgresql
+    ports:
+      - 8099:8080
+    command: webserver
+    <<: *airflow-volumes
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:webserver.localhost"
+      - "traefik.port=8099"
 
-  # scheduler:
-  #   build: .
-  #   restart: always
-  #   depends_on:
-  #     - webserver
-  #   volumes:
-  #     - ./dags:/usr/local/airflow/dags
-  #     - ./src:/usr/local/airflow/src
-  #     - ./logs:/usr/local/airflow/logs
-  #   env_file: .env
-  #   environment:
-  #     - ENVIRONMENT=docker
-  #   command: scheduler
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.frontend.rule=Host:scheduler.localhost"
-  #     - "traefik.port=8973"
+  scheduler:
+    <<: *airflow-environment
+    restart: always
+    depends_on:
+      - postgresql
+    command: scheduler
+    <<: *airflow-volumes
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:scheduler.localhost"
+      - "traefik.port=8973"
 
-  # postgres:
-  #   image: bitnami/postgresql:latest
-  #   hostname: postgresql
-  #   environment:
-  #     - POSTGRES_HOST=postgresql
-  #     - POSTGRES_USER=airflow
-  #     - POSTGRES_PASSWORD=postgresql
-  #     - POSTGRES_DB=airflow
-  #   ports:
-  #     - 5432:5432
+  postgresql:
+    image: bitnami/postgresql:latest
+    hostname: postgresql
+    environment:
+      - POSTGRESQL_HOST=postgresql
+      - POSTGRESQL_HOST=fullflow
+      - POSTGRESQL_PASSWORD=postgresql
+      - POSTGRESQL_DATABASE=airflow
+    volumes:
+      - ./postgresql:/bitnami/postgresql
+    ports:
+      - 5432:5432
 
 

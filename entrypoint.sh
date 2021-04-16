@@ -7,7 +7,15 @@ if [ -e ".env" ]; then
     set +a
 fi
 
-echo $PYTHONPATH
+
+wait_for_pg() {
+    until pg_isready -h $POSTGRES_HOST -p "5432";
+    do
+      echo "Waiting for postgres to get its shit together"
+      sleep 2
+    done
+}
+
 
 case "$1" in
 webserver)
@@ -17,14 +25,20 @@ webserver)
     airflow webserver
     ;;
 scheduler)
-    echo "Initializing DB"
-    airflow db init
+    wait_for_pg
     if [ "$WORKFLOW_UPGRADE_DB" = "True" ]; then
         echo "Upgrading DB"
         airflow db upgrade
+
+    elif ["$KUBERNETES_MIGRATION" = "True"]; then
+        echo "Wait for database migrations"
+        airflow check_migrations
+    else
+        echo "Initialize Database"
+        airflow db init
     fi
     echo "Creating Admin User"
-    airflow users create --role Admin --username admin --email bandikishores@gmail.com --firstname Workflow --lastname Service --password admin
+    airflow users create --role Admin --username admin --email noreply@admin --firstname Workflow --lastname Service --password admin
     echo "Starting Scheduler"
     exec airflow "$@"
     ;;
@@ -36,7 +50,7 @@ worker)
     ;;
 lab)
     echo "jupyter gateway url must be set"
-    exec jupyter "$@"
+    exec jupyter "$@" --gateway
     ;;
 version)
     echo "Printing Version"

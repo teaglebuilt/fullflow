@@ -4,9 +4,14 @@ global:
 
 tags:
   traefik: false
-  gateway: true
+  gateway: false
 
 
 image: teaglebuilt/fullflow:dev
+pullPolicy: Always
+
 db:
   image: bitnami/postgresql:latest
+  pullPolicy: Always
+  persistence:
+    enabled: false

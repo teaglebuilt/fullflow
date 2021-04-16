@@ -23,6 +23,7 @@ spec:
       containers:
         - name: notebook
           image: {{ .Values.image }}
+          imagePullPolicy: Always
           args: ["lab"]
           env:
             - name: JUPYTER_GATEWAY_URL

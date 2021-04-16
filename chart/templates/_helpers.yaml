@@ -1,0 +1,23 @@
+{{/* Standard Airflow environment variables */}}
+{{ define "airflow_default_environment" }}
+- name: AIRFLOW__CORE__FERNET_KEY
+  value: "_vlbm4VJwSvCYuBSHlOGPqDQyWkgrSp47P8ou6zP0zY="
+- name: POSTGRES_PASSWORD
+  value: postgresql
+- name: POSTGRES_USER
+  value: fullflow
+- name: POSTGRES_HOST
+  value: postgresql
+- name: POSTGRES_DATABASE
+  value: airflow
+- name: AIRFLOW__CORE__EXECUTOR
+  value: LocalExecutor
+- name: AIRFLOW__CORE__DAGS_FOLDER
+  value: /usr/local/airflow/dags
+- name: AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS
+  value: "False"
+- name: AIRFLOW_HOME
+  value: /usr/local/airflow
+- name: PYTHONPATH
+  value: /usr/local/airflow
+{{ end }}

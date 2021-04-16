@@ -1,0 +1,68 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-database
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-database
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-database
+    spec:
+      containers:
+      - name: postgres
+        imagePullPolicy: IfNotPresent
+        image: bitnami/postgresql:latest
+        ports:
+          - name: postgresport
+            containerPort: 5432
+        resources:
+          limits:
+            cpu: 100m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        env:
+          - name: POSTGRESQL_USERNAME
+            value: fullflow
+          - name: POSTGRESQL_PASSWORD
+            value: postgresql
+          - name: POSTGRESQL_DATABASE
+            value: airflow
+          {{ if .Values.db.persistence.enabled }}
+          - name: PGDATA
+            value: /bitnami/postgresql
+          {{ end }}
+        securityContext:
+          runAsUser: 1001
+        {{ if .Values.db.persistence.enabled }}
+        volumeMounts:
+          - mountPath: /bitnami/postgresql
+            name: postgres-data
+        {{ end }}
+  {{ if .Values.db.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteMany"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 1Gi
+      volumeName: "postgres-volume"
+  {{ end }}

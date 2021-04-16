@@ -23,10 +23,16 @@ spec:
       containers:
         - name: webserver
           image: {{ .Values.image }}
+          imagePullPolicy: Always
           args: ["webserver"]
-          envFrom:
-            - configMapRef:
-                name: fullflow-envvars
+          env:
+        {{- include "airflow_default_environment" . | indent 10 }}
+          resources:
+            limits:
+              cpu: 250m
+              memory: 1000Mi
+            requests:
+              memory: 500Mi
           livenessProbe:
             httpGet:
               path: "/health"
@@ -35,3 +41,9 @@ spec:
             - containerPort: 8080
           securityContext:
             runAsUser: 1000
+          volumeMounts:
+            - name: logs
+              mountPath: /usr/local/airflow/logs
+      volumes:
+        - name: logs
+          emptyDir: {}

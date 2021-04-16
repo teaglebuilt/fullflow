@@ -12,11 +12,3 @@ def airflow_dag():
         default_args={'owner': 'airflow'}
     )
     yield dag
-
-
-@fixture
-def airflow_operator():
-    yield PythonOperator(
-        task_id='python_operator',
-        python_callable=two
-    )

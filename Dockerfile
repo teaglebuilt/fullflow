@@ -50,7 +50,6 @@ COPY configs/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY entrypoint.sh /entrypoint.sh
 COPY requirements.txt ${AIRFLOW_HOME}/requirements.txt
 COPY notebooks ${AIRFLOW_HOME}/notebooks
-COPY test.py ${AIRFLOW_HOME}/test.py
 
 
 RUN pip install -r requirements.txt

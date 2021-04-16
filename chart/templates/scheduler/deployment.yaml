@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-scheduler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: {{ .Release.Name }}-scheduler
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-scheduler
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: scheduler
+          image: {{ .Values.image }}
+          imagePullPolicy: Always
+          args: ["scheduler"]
+          env:
+        {{- include "airflow_default_environment" . | indent 10 }}
+          ports:
+            - containerPort: 8379
+          resources:
+            limits:
+              cpu: 250m
+              memory: 1000Mi
+            requests:
+              memory: 500Mi
+          securityContext:
+            runAsUser: 1000
+          livenessProbe:
+            initialDelaySeconds: 10
+            timeoutSeconds: 30
+            failureThreshold: 10
+            periodSeconds: 30
+            exec:
+              command:
+              - /usr/bin/env
+              - AIRFLOW__CORE__LOGGING_LEVEL=ERROR
+              - python3
+              - -Wignore
+              - -c
+              - |
+                from airflow.jobs.scheduler_job import SchedulerJob
+                from airflow.utils.db import create_session
+                from airflow.utils.net import get_hostname
+                import sys
+                with create_session() as session:
+                  job = session.query(SchedulerJob).filter_by(hostname=get_hostname()).order_by(SchedulerJob.latest_heartbeat.desc()).limit(1).first()
+                sys.exit(0 if job.is_alive() else 1)
+          volumeMounts:
+            - name: logs
+              mountPath: /usr/local/airflow/logs
+      volumes:
+        - name: logs
+          emptyDir: {}
