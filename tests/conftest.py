@@ -1,6 +1,4 @@
 from airflow.models import DAG
-from airflow.operators.python import PythonOperator
-from src.models import Node
 from pytest import fixture
 
 
