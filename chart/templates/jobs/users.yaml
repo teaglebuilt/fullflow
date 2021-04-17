@@ -1,0 +1,39 @@
+{{ if .Values.jobs.users }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: airflow-users
+  labels:
+    app: {{ .Release.Name }}
+    component: {{ .Release.Name }}-job
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: {{ .Release.Name }}-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-users
+          image: {{ .Values.image }}
+          env:
+        {{- include "airflow_default_environment" . | indent 10 }}
+          command: ""
+          volumeMounts:
+          - name: bin
+            mountPath: /usr/local/bin
+      volumes:
+        - name: bin
+          secret:
+            secretName: airflow-bin-scripts
+            defaultMode: 0755
+{{ end }}

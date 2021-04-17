@@ -8,6 +8,12 @@ tags:
   loki: false
   grafana: false
 
+jobs:
+  connections: false
+  users: false
+  variables: false
+  migrations: false
+
 
 image: teaglebuilt/fullflow:dev
 pullPolicy: Always
