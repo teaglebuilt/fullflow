@@ -40,3 +40,6 @@ class FileDict(MutableMapping):
 
     def __repr__(self):
         return f"FileDict{tuple(self.items())}"
+
+    def __len__(self) -> int:
+        pass

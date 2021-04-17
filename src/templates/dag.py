@@ -6,7 +6,10 @@ from src.core import Template
 
 
 class Dag(Template):
-    template: '''
+    """
+    Base template for airflow dag
+    """
+    template: str = '''
     from airflow.models import DAG, TaskInstance
     from airflow.contrib.operators import kubernetes_pod_operator
 
@@ -37,6 +40,6 @@ class Dag(Template):
         if isinstance(self.dag, dict):
             self.dag = DAG.parse_obj(self.dag)
 
-    def nodes(self):
-        for node_name, node in self.dag.nodes.items():
-            yield NodeTask(name=node_name, node=node)
+    # def nodes(self):
+    #     for node_name, node in self.dag.nodes.items():
+    #         yield NodeTask(name=node_name, node=node)

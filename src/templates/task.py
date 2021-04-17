@@ -2,7 +2,9 @@ from src.core import Template
 
 
 class Task(Template):
-    template = '''
+    """
+    Class for template airflow task
+    """
+    template: str = '''
     '''
     node_name: str
-    node: Node
