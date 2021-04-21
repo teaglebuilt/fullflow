@@ -3,12 +3,14 @@ global:
   namespace: default
 
 tags:
-  traefik: false
+  ingress-nginx: true
   gateway: false
   loki: false
   grafana: false
 
+
 jobs:
+  enabled: false
   connections: false
   users: false
   variables: false
@@ -17,6 +19,11 @@ jobs:
 
 image: teaglebuilt/fullflow:dev
 pullPolicy: Always
+
+
+webserver:
+  port: 8080
+  containerPort: 8080
 
 
 db:

@@ -1,16 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-scheduler
+  name: scheduler
   labels:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-scheduler
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
-  {{- if eq .Values.global.environment "local" }}
-  type: NodePort
-  {{ end }}
   selector:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-scheduler

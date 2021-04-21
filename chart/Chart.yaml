@@ -3,10 +3,10 @@ name: fullflow
 description: Fullflow helm chart for infrastructure packaging on kubernetes
 version: 0.1.0
 dependencies:
-- name: traefik
-  repository: file://charts/traefik
+- name: ingress-nginx
+  repository: file://charts/ingress-nginx
   tags:
-    - traefik
+    - ingress-nginx
 - name: gateway
   repository: file://charts/gateway
   tags:
