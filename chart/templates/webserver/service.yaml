@@ -8,9 +8,14 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
+  {{ if .Values.webserver.expose }}
+  type: NodePort
+  {{ end }}
   selector:
     app: {{ .Release.Name }}
     component: {{ .Release.Name }}-webserver
   ports:
-  - port: {{ .Values.webserver.port }}
-    targetPort: {{ .Values.webserver.containerPort }}
+    - name: http
+      protocol: TCP
+      port: {{ .Values.webserver.port }}
+      targetPort: {{ .Values.webserver.containerPort }}

@@ -37,7 +37,7 @@ jobs:
 
       - name: Run Pylint
         run: |
-          pytest tests
+          pylint src/
 
   unit_testing:
     runs-on: ubuntu-latest

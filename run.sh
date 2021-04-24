@@ -55,14 +55,18 @@ ci() {
 
 cluster() {
     echo "creating local cluster"
-    kind create cluster \
-        --config ./k8s/kind/config.yaml \
-        --name fullflow
+    ./ci/kind.sh
 }
 
 export() {
-    echo "export helm chart into test directory"
-    helm template . --output-dir './test'
+    if [ -z "$1" ]
+      then
+        echo "exporting parent chart"
+        helm template . --output-dir './export'
+    else
+        echo "exporting chart $1 into export/$1"
+        helm template ./chart/charts/$1 --output-dir './export'
+    fi
 }
 
 

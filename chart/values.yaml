@@ -3,7 +3,7 @@ global:
   namespace: default
 
 tags:
-  ingress-nginx: true
+  ingress-nginx: false
   gateway: false
   loki: false
   grafana: false
@@ -20,11 +20,16 @@ jobs:
 image: teaglebuilt/fullflow:dev
 pullPolicy: Always
 
+ingress:
+  enabled: false
+
+network:
+  enabled: false
 
 webserver:
+  expose: true
   port: 8080
   containerPort: 8080
-
 
 db:
   image: bitnami/postgresql:latest
