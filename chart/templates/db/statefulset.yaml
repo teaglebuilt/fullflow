@@ -59,10 +59,10 @@ spec:
   - metadata:
       name: postgres-data
     spec:
-      accessModes: ["ReadWriteMany"]
-      storageClassName: "standard"
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
       resources:
         requests:
           storage: 1Gi
-      volumeName: "postgres-volume"
+      volumeName: postgres-volume
   {{ end }}

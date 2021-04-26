@@ -58,6 +58,8 @@ cluster() {
     ./ci/kind.sh
 }
 
+
+
 export() {
     if [ -z "$1" ]
       then
@@ -69,11 +71,21 @@ export() {
     fi
 }
 
+watch() {
+  case $input in
+    lb)
+      echo "watching LB"
+      kubectl get pods -n metallb-system --watch ;;
+    *)
+      echo "Watch yourself instead.." ;;
+  esac
+}
+
 
 function help {
-    printf "%s <task> [args]\n\nTasks:\n" "${0}"
-    compgen -A function | grep -v "^_" | cat -n
-    printf "\nExtended help:\n "
+  printf "%s <task> [args]\n\nTasks:\n" "${0}"
+  compgen -A function | grep -v "^_" | cat -n
+  printf "\nExtended help:\n "
 }
 
 
