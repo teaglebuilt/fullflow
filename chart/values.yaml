@@ -7,6 +7,7 @@ tags:
   gateway: false
   loki: false
   grafana: false
+  prometheus: false
 
 
 jobs:

@@ -1,0 +1,16 @@
+---
+- name: Backup Helm values
+  copy:
+    dest: "{{ astro_save_dir.path }}/helm-user-values.json"
+    content: "{{ helm_values | to_json }}"
+
+- name: Run Database Backup
+  postgresql_db:
+    port: "{{ db_port }}"
+    login_host: "{{ db_hostname }}"
+    login_user: "{{ db_username }}"
+    login_password: "{{ db_password }}"
+    name: "{{ database_name }}"
+    state: dump
+    target: "{{ astro_save_dir.path }}/db-backup.tar"
+    target_opts: "--clean --create --format=tar"

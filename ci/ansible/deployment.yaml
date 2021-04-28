@@ -1,0 +1,5 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Upgrade
+    import_tasks: tasks/upgrade.yaml

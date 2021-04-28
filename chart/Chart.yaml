@@ -19,3 +19,7 @@ dependencies:
   repository: file://charts/loki
   tags:
     - loki
+- name: prometheus
+  repository: file://charts/prometheus
+  tags:
+  - prometheus

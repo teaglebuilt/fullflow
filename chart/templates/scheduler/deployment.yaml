@@ -29,7 +29,7 @@ spec:
           env:
         {{- include "airflow_default_environment" . | indent 10 }}
           ports:
-            - containerPort: 8379
+            - containerPort: 8739
           resources:
             limits:
               cpu: 250m
