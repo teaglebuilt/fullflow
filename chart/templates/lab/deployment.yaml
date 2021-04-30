@@ -24,7 +24,7 @@ spec:
         - name: jupyterlab
           image: {{ .Values.image }}
           imagePullPolicy: Always
-          args: ["lab", "--gateway-url=http://enterprise-gateway:8888"]
+          args: ["lab"]
           env:
             - name: JUPYTER_GATEWAY_URL
               value: http://enterprise-gateway:8888

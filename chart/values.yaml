@@ -32,9 +32,9 @@ webserver:
   port: 8080
   containerPort: 8080
 
-db:
+postgresql:
   image: bitnami/postgresql:latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   persistence:
     enabled: false
 
