@@ -5,11 +5,11 @@
 - name: POSTGRES_PASSWORD
   value: postgresql
 - name: POSTGRES_USER
-  value: fullflow
+  value: admin
 - name: POSTGRES_HOST
   value: postgresql
-- name: POSTGRES_DATABASE
-  value: airflow
+- name: POSTGRES_DB
+  value: fullflow
 - name: AIRFLOW__CORE__EXECUTOR
   value: LocalExecutor
 - name: AIRFLOW__CORE__DAGS_FOLDER
