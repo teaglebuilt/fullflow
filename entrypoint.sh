@@ -49,8 +49,8 @@ worker)
     exec airflow "$@"
     ;;
 lab)
-    echo "jupyter gateway url must be set"
-    exec jupyter "$@" --gateway-url=$JUPYTER_ENTERPRISE_GATEWAY
+    echo "starting jupyter lab"
+    exec jupyter "$@" --gateway-url="$JUPYTER_GATEWAY_URL"
     ;;
 version)
     echo "Printing Version"
