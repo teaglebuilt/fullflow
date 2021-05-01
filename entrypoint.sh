@@ -50,7 +50,7 @@ worker)
     ;;
 lab)
     echo "jupyter gateway url must be set"
-    exec jupyter "$@" --gateway
+    exec jupyter "$@" --gateway-url=$JUPYTER_ENTERPRISE_GATEWAY
     ;;
 version)
     echo "Printing Version"
