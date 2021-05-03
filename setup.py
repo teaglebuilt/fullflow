@@ -19,23 +19,29 @@ requirements = [
 ]
 
 setup(
-    name='fullflow_extension',
+    name='fullflow',
     description="Machine Learning and ETL Platform as a service.",
     version='0.0.1',
     url='https://github.com/teaglebuilt/fullflow',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
+        'Environment :: Console',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     long_description=readme,
     long_description_content_type='text/markdown',
     install_requires=requirements,
     include_package_data=True,
     keywords='etl, pipelines, machinelearning',
-    packages=find_packages()
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'fullflow=src.cli.main:cli',
+        ]
+    }
 )

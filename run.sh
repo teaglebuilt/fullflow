@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+local() {
+    echo "Running Locally"
+    honcho -f Procfile start
+}
 
 open() {
     echo "port forwarding ${1} over ${2}"
