@@ -10,3 +10,4 @@ def airflow_dag():
         default_args={'owner': 'airflow'}
     )
     yield dag
+

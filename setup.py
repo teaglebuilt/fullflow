@@ -38,10 +38,9 @@ setup(
     install_requires=requirements,
     include_package_data=True,
     keywords='etl, pipelines, machinelearning',
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={"": "src"},
     entry_points={
-        'console_scripts': [
-            'fullflow=src.cli.main:cli',
-        ]
-    }
+        "console_scripts": ["fullflow = fullflow.cli.main:cli"],
+    },
 )
